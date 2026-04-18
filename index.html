@@ -15,6 +15,25 @@
       gtag('js', new Date());
 
       gtag('config', 'G-XBZM5YMRCX');
+
+      function allConsentGranted() {
+        gtag('consent', 'update', {
+          'ad_user_data': 'granted',
+          'ad_personalization': 'granted',
+          'ad_storage': 'granted',
+          'analytics_storage': 'granted'
+        });
+        const banner = document.getElementById('consent-banner');
+        if (banner) banner.style.display = 'none';
+        localStorage.setItem('consent-granted', 'true');
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('consent-granted') === 'true') {
+          const banner = document.getElementById('consent-banner');
+          if (banner) banner.style.display = 'none';
+        }
+      });
     </script>
     <meta charset="UTF-8">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6336909015716099"
@@ -354,9 +373,64 @@
         @media (max-width: 850px) {
             .main-grid { grid-template-columns: 1fr; }
         }
+
+        /* 동의 배너 스타일 */
+        .consent-banner {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(90%, 600px);
+            background: var(--panel-strong);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            box-shadow: var(--shadow);
+            z-index: 2000;
+        }
+        .consent-content p {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+        .consent-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            background: var(--primary);
+            color: var(--chip-active-text);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: transform 0.2s ease;
+        }
+        .consent-btn:hover { transform: scale(1.05); }
+        
+        @media (max-width: 600px) {
+            .consent-banner {
+                flex-direction: column;
+                text-align: center;
+                bottom: 16px;
+                padding: 16px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="consent-banner" class="consent-banner">
+        <div class="consent-content">
+            <p><strong>쿠키 사용 및 데이터 수집 동의</strong><br>
+            서비스 품질 향상 및 맞춤형 광고 제공을 위해 데이터를 수집합니다.</p>
+        </div>
+        <button class="consent-btn" onclick="allConsentGranted()">모두 동의함</button>
+    </div>
     <main class="shell">
         <header class="header">
             <div class="title-area">
