@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로또 번호 생성기</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            text-align: center;
+            color: white;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #ffcc00;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .set {
+            background: white;
+            color: black;
+            margin: 10px auto;
+            padding: 10px;
+            width: 220px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🎰 로또 번호 추천기</h1>
+<p>버튼을 누르면 번호 5개씩 5세트 생성!</p>
+
+<button onclick="generateLotto()">번호 생성</button>
+
+<div id="result"></div>
+
+<script>
+function generateLotto() {
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "";
+
+    for (let i = 0; i < 5; i++) {  // 5세트
+        let numbers = [];
+
+        while (numbers.length < 5) {  // ⭐ 여기만 6 → 5로 변경
+            let num = Math.floor(Math.random() * 45) + 1;
+            if (!numbers.includes(num)) {
+                numbers.push(num);
+            }
+        }
+
+        numbers.sort((a, b) => a - b);
+
+        const div = document.createElement("div");
+        div.className = "set";
+        div.innerText = numbers.join(" - ");
+
+        resultDiv.appendChild(div);
+    }
+}
+</script>
+
+</body>
+</html>
