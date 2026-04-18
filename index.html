@@ -6,7 +6,15 @@
      crossorigin="anonymous"></script>
     <meta name="google-adsense-account" content="ca-pub-6336909015716099">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Face Recognizer</title>
+    <title>AI Face Recognizer - 실시간 얼굴 인식 및 분석 도구</title>
+    <meta name="description" content="Teachable Machine AI 모델을 활용한 실시간 얼굴 인식 도구입니다. 웹캠을 통해 쉽고 빠르게 얼굴을 구분하고 분석해보세요. 모든 처리는 브라우저에서 안전하게 이루어집니다.">
+    <meta name="keywords" content="AI, 얼굴인식, 머신러닝, Teachable Machine, 실시간분석, 인공지능">
+    
+    <!-- Open Graph for Social Media -->
+    <meta property="og:title" content="AI Face Recognizer - 실시간 얼굴 인식">
+    <meta property="og:description" content="브라우저에서 바로 실행되는 인공지능 얼굴 인식 도구">
+    <meta property="og:type" content="website">
+
     <style>
         :root {
             color-scheme: light;
@@ -25,6 +33,7 @@
             --chip-active-text: #ffffff;
             --bar-bg: rgba(0, 0, 0, 0.05);
             --bar-fill: linear-gradient(90deg, #f59e0b, #ef4444);
+            --footer-text: #64748b;
         }
 
         html[data-theme="dark"] {
@@ -44,6 +53,7 @@
             --chip-active-text: #0f172a;
             --bar-bg: rgba(255, 255, 255, 0.1);
             --bar-fill: linear-gradient(90deg, #38bdf8, #818cf8);
+            --footer-text: #94a3b8;
         }
 
         * { box-sizing: border-box; }
@@ -52,8 +62,8 @@
             margin: 0;
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 32px 16px;
             font-family: "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
             color: var(--text-main);
@@ -69,6 +79,7 @@
             background: var(--panel);
             backdrop-filter: blur(22px);
             box-shadow: var(--shadow);
+            margin-bottom: 40px;
         }
 
         .header {
@@ -115,6 +126,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
+            margin-bottom: 32px;
         }
 
         .card {
@@ -187,9 +199,7 @@
             margin-bottom: 12px;
         }
 
-        .start-button:hover {
-            transform: scale(1.05);
-        }
+        .start-button:hover { transform: scale(1.05); }
 
         .loading-overlay {
             position: absolute;
@@ -272,15 +282,71 @@
             color: var(--text-main);
         }
 
-        @media (max-width: 850px) { .main-grid { grid-template-columns: 1fr; } }
+        /* 상세 정보 섹션 */
+        .content-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .info-box h3 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .info-box p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin: 0 0 16px;
+        }
+
+        .info-box ul {
+            padding-left: 20px;
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-box li { margin-bottom: 8px; }
+
+        /* 푸터 */
+        footer {
+            width: min(100%, 1000px);
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--footer-text);
+            font-size: 0.85rem;
+        }
+
+        footer nav {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        footer a {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 850px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <main class="shell">
         <header class="header">
             <div class="title-area">
-                <div class="eyebrow">AI VISION SERVICE</div>
-                <h1>Face Recognizer</h1>
+                <div class="eyebrow">AI VISION TECHNOLOGY</div>
+                <h1>AI Face Recognizer</h1>
             </div>
             <div class="theme-switcher" role="group" aria-label="테마 전환">
                 <button type="button" class="theme-chip" data-theme-option="light" aria-pressed="true">Light</button>
@@ -288,9 +354,10 @@
             </div>
         </header>
 
+        <!-- 메인 인터랙션 영역 -->
         <div class="main-grid">
             <section class="card">
-                <div class="eyebrow">LIVE CAMERA</div>
+                <div class="eyebrow">LIVE ANALYZER</div>
                 <div id="webcam-container">
                     <div class="start-prompt" id="start-prompt">
                         <button type="button" class="start-button" onclick="init()">웹캠 시작하기</button>
@@ -298,26 +365,66 @@
                     </div>
                     <div class="loading-overlay" id="loading-overlay">
                         <div class="spinner"></div>
-                        <p id="loading-text">모델 로드 중...</p>
+                        <p id="loading-text">인공지능 모델을 불러오는 중...</p>
                     </div>
                 </div>
                 <p style="margin: 16px 0 0; font-size: 14px; color: var(--text-muted); line-height: 1.5;">
-                    인공지능 모델이 실시간으로 얼굴을 구분합니다.
+                    실시간으로 얼굴 특징을 분석하여 학습된 데이터를 기반으로 대상을 구분합니다.
                 </p>
             </section>
 
             <section class="card">
-                <div class="eyebrow">ANALYSIS RESULT</div>
+                <div class="eyebrow">PREDICTION DASHBOARD</div>
                 <div class="prediction-list" id="label-container">
-                    <!-- 예측 결과 동적 생성 -->
+                    <!-- 결과 바가 여기에 동적으로 생성됩니다 -->
                 </div>
                 <div class="top-prediction-highlight">
-                    <span>가장 일치하는 결과</span>
-                    <strong id="top-prediction-text">분석 전</strong>
+                    <span>현재 가장 높은 확률</span>
+                    <strong id="top-prediction-text">대기 중</strong>
                 </div>
             </section>
         </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 32px 0;">
+
+        <!-- 텍스트 콘텐츠 보강 영역 (SEO 및 애드센스 고품질 평가용) -->
+        <section class="content-section">
+            <article class="info-box">
+                <div class="eyebrow">HOW IT WORKS</div>
+                <h3>인공지능 작동 원리</h3>
+                <p>본 서비스는 Google의 Teachable Machine 기술과 TensorFlow.js를 기반으로 작동합니다. 사전에 학습된 딥러닝 모델이 웹캠 이미지를 실시간으로 분석하여 각 클래스별 일치 확률을 계산합니다.</p>
+                <p>브라우저의 가속 성능을 활용하여 끊김 없는 분석을 제공하며, 복잡한 설치 없이 바로 사용이 가능합니다.</p>
+            </article>
+
+            <article class="info-box">
+                <div class="eyebrow">GUIDE</div>
+                <h3>인식률을 높이는 방법</h3>
+                <ul>
+                    <li><strong>조명 확인</strong>: 얼굴이 너무 어둡거나 역광인 경우 인식률이 떨어질 수 있습니다.</li>
+                    <li><strong>각도 유지</strong>: 가급적 카메라와 정면을 유지해 주세요.</li>
+                    <li><strong>안경 및 액세서리</strong>: 학습 데이터와 일치하지 않는 소품은 결과에 영향을 줄 수 있습니다.</li>
+                </ul>
+            </article>
+
+            <article class="info-box">
+                <div class="eyebrow">PRIVACY</div>
+                <h3>개인정보 및 데이터 보안</h3>
+                <p>사용자의 개인정보를 최우선으로 생각합니다. 이 서비스의 모든 이미지 분석은 <strong>사용자의 브라우저 내에서만</strong> 이루어집니다.</p>
+                <p>웹캠 영상은 서버로 전송되거나 저장되지 않으며, 페이지를 닫는 즉시 모든 데이터는 소멸됩니다. 안심하고 사용하세요.</p>
+            </article>
+        </section>
     </main>
+
+    <footer>
+        <nav>
+            <a href="#">홈</a>
+            <a href="#">개인정보 처리방침</a>
+            <a href="#">이용약관</a>
+            <a href="https://github.com/kimhj1769-hue" target="_blank">개발자 정보</a>
+        </nav>
+        <p>&copy; 2024 AI Face Recognizer. All rights reserved.</p>
+        <p style="margin-top: 10px; opacity: 0.7;">Powered by TensorFlow.js & Teachable Machine</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
@@ -334,7 +441,7 @@
         themeButtons.forEach(btn => btn.addEventListener("click", () => setTheme(btn.dataset.themeOption)));
         setTheme(localStorage.getItem("face-recognizer-theme") || "light");
 
-        // Teachable Machine 로직 (제공해주신 코드 통합)
+        // Teachable Machine 로직
         const URL = "https://teachablemachine.withgoogle.com/models/DvudTMBLc/";
         let model, webcam, labelContainer, maxPredictions;
         const loadingOverlay = document.getElementById('loading-overlay');
@@ -361,7 +468,7 @@
                 document.getElementById("webcam-container").appendChild(webcam.canvas);
                 labelContainer = document.getElementById("label-container");
                 
-                labelContainer.innerHTML = ''; // 초기화
+                labelContainer.innerHTML = '';
                 for (let i = 0; i < maxPredictions; i++) {
                     const item = document.createElement("div");
                     item.className = "prediction-item";
@@ -380,7 +487,7 @@
                 loadingOverlay.style.display = 'none';
             } catch (error) {
                 console.error(error);
-                document.getElementById('loading-text').innerText = "오류: " + error.message;
+                document.getElementById('loading-text').innerText = "오류 발생: 카메라 권한을 확인해주세요.";
             }
         }
 
