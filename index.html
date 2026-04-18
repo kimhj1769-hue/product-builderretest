@@ -1,70 +1,427 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로또 번호 생성기</title>
     <style>
+        :root {
+            color-scheme: light;
+            --bg-main: linear-gradient(135deg, #fff7ed 0%, #fde68a 45%, #fca5a5 100%);
+            --bg-accent: radial-gradient(circle at top, rgba(255, 255, 255, 0.72), transparent 42%);
+            --panel: rgba(255, 255, 255, 0.72);
+            --panel-strong: rgba(255, 255, 255, 0.9);
+            --text-main: #172033;
+            --text-muted: #52607a;
+            --border: rgba(255, 255, 255, 0.56);
+            --shadow: 0 24px 60px rgba(168, 85, 247, 0.18);
+            --hero-shadow: 0 14px 34px rgba(251, 146, 60, 0.22);
+            --primary: #111827;
+            --primary-hover: #1f2937;
+            --secondary: rgba(255, 255, 255, 0.72);
+            --secondary-hover: rgba(255, 255, 255, 0.92);
+            --chip-active-bg: #111827;
+            --chip-active-text: #ffffff;
+            --set-bg: rgba(255, 255, 255, 0.85);
+            --ball-bg: #ffffff;
+            --ball-text: #111827;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+            --bg-main: linear-gradient(135deg, #020617 0%, #172554 48%, #312e81 100%);
+            --bg-accent: radial-gradient(circle at top, rgba(56, 189, 248, 0.22), transparent 42%);
+            --panel: rgba(15, 23, 42, 0.78);
+            --panel-strong: rgba(15, 23, 42, 0.92);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.18);
+            --shadow: 0 24px 60px rgba(2, 6, 23, 0.48);
+            --hero-shadow: 0 16px 44px rgba(56, 189, 248, 0.12);
+            --primary: #f8fafc;
+            --primary-hover: #dbeafe;
+            --secondary: rgba(30, 41, 59, 0.72);
+            --secondary-hover: rgba(51, 65, 85, 0.92);
+            --chip-active-bg: #f8fafc;
+            --chip-active-text: #0f172a;
+            --set-bg: rgba(15, 23, 42, 0.88);
+            --ball-bg: rgba(30, 41, 59, 0.95);
+            --ball-text: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            text-align: center;
-            color: white;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px;
+            font-family: "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+            color: var(--text-main);
+            background: var(--bg-accent), var(--bg-main);
+            transition: background 0.35s ease, color 0.25s ease;
         }
-        button {
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: #ffcc00;
+
+        .shell {
+            width: min(100%, 920px);
+            padding: 28px;
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            background: var(--panel);
+            backdrop-filter: blur(22px);
+            box-shadow: var(--shadow);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .theme-switcher {
+            display: inline-flex;
+            gap: 8px;
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--panel-strong);
+        }
+
+        .theme-chip,
+        .generate-button {
             border: none;
-            border-radius: 10px;
             cursor: pointer;
-            margin-top: 20px;
+            transition: transform 0.18s ease, background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
         }
+
+        .theme-chip {
+            min-width: 88px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .theme-chip[aria-pressed="true"] {
+            background: var(--chip-active-bg);
+            color: var(--chip-active-text);
+        }
+
+        .theme-chip:hover,
+        .generate-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .hero-card,
+        .preview-card {
+            padding: 28px;
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            background: var(--panel-strong);
+            box-shadow: var(--hero-shadow);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--secondary);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 3.4rem);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p,
+        .preview-card p {
+            margin: 14px 0 0;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 24px;
+        }
+
+        .generate-button {
+            padding: 15px 24px;
+            border-radius: 16px;
+            background: var(--primary);
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        html[data-theme="dark"] .generate-button {
+            color: #020617;
+        }
+
+        .helper {
+            display: inline-flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: var(--secondary);
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .preview-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .preview-ball {
+            display: grid;
+            place-items: center;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: var(--ball-bg);
+            color: var(--ball-text);
+            font-weight: 800;
+            box-shadow: inset 0 0 0 1px var(--border);
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 28px;
+        }
+
         .set {
-            background: white;
-            color: black;
-            margin: 10px auto;
-            padding: 10px;
-            width: 220px;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
+            padding: 18px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--set-bg);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .set-label {
+            margin-bottom: 14px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .ball {
+            min-width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--ball-bg);
+            color: var(--ball-text);
+            font-weight: 800;
+            box-shadow: inset 0 0 0 1px var(--border);
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 18px 12px;
+            }
+
+            .shell {
+                padding: 18px;
+                border-radius: 22px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-card,
+            .preview-card {
+                padding: 22px;
+            }
+
+            .toolbar {
+                justify-content: center;
+            }
+
+            .theme-switcher {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .theme-chip {
+                flex: 1;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .generate-button,
+            .helper {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
+    <main class="shell">
+        <div class="toolbar">
+            <div class="theme-switcher" role="group" aria-label="테마 전환">
+                <button type="button" class="theme-chip" data-theme-option="light" aria-pressed="true">화이트</button>
+                <button type="button" class="theme-chip" data-theme-option="dark" aria-pressed="false">다크</button>
+            </div>
+        </div>
 
-<h1>🎰 로또 번호 추천기</h1>
-<p>버튼을 누르면 번호 5개씩 5세트 생성!</p>
+        <section class="hero">
+            <div class="hero-card">
+                <div class="eyebrow">LOTTO PICKER</div>
+                <h1>화이트 모드와 다크 모드로 바꿔가며 번호를 뽑아보세요.</h1>
+                <p>버튼 한 번으로 5세트의 번호를 만들고, 선택한 테마는 다음 방문에도 그대로 유지됩니다.</p>
+                <div class="actions">
+                    <button type="button" class="generate-button" id="generate-button">번호 생성</button>
+                    <div class="helper">세트당 5개 번호, 총 5세트 생성</div>
+                </div>
+            </div>
 
-<button onclick="generateLotto()">번호 생성</button>
+            <aside class="preview-card">
+                <div>
+                    <div class="eyebrow">PREVIEW</div>
+                    <p>현재 테마와 어울리도록 카드, 배경, 번호 볼의 대비가 함께 바뀝니다.</p>
+                </div>
+                <div class="preview-grid" aria-hidden="true">
+                    <div class="preview-ball">7</div>
+                    <div class="preview-ball">14</div>
+                    <div class="preview-ball">27</div>
+                    <div class="preview-ball">31</div>
+                    <div class="preview-ball">38</div>
+                    <div class="preview-ball">42</div>
+                </div>
+            </aside>
+        </section>
 
-<div id="result"></div>
+        <section class="results" id="result" aria-live="polite"></section>
+    </main>
 
-<script>
-function generateLotto() {
-    const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = "";
+    <script>
+        const html = document.documentElement;
+        const resultDiv = document.getElementById("result");
+        const generateButton = document.getElementById("generate-button");
+        const themeButtons = document.querySelectorAll("[data-theme-option]");
+        const THEME_KEY = "lotto-theme";
 
-    for (let i = 0; i < 5; i++) {  // 5세트
-        let numbers = [];
+        function setTheme(theme) {
+            html.dataset.theme = theme;
+            localStorage.setItem(THEME_KEY, theme);
 
-        while (numbers.length < 5) {  // ⭐ 여기만 6 → 5로 변경
-            let num = Math.floor(Math.random() * 45) + 1;
-            if (!numbers.includes(num)) {
-                numbers.push(num);
+            themeButtons.forEach((button) => {
+                const selected = button.dataset.themeOption === theme;
+                button.setAttribute("aria-pressed", String(selected));
+            });
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem(THEME_KEY);
+            if (savedTheme === "dark" || savedTheme === "light") {
+                setTheme(savedTheme);
+                return;
+            }
+
+            setTheme("light");
+        }
+
+        function createBall(number) {
+            const ball = document.createElement("span");
+            ball.className = "ball";
+            ball.textContent = String(number);
+            return ball;
+        }
+
+        function generateLotto() {
+            resultDiv.innerHTML = "";
+
+            for (let i = 0; i < 5; i += 1) {
+                const numbers = [];
+
+                while (numbers.length < 5) {
+                    const num = Math.floor(Math.random() * 45) + 1;
+                    if (!numbers.includes(num)) {
+                        numbers.push(num);
+                    }
+                }
+
+                numbers.sort((a, b) => a - b);
+
+                const set = document.createElement("article");
+                set.className = "set";
+
+                const label = document.createElement("div");
+                label.className = "set-label";
+                label.textContent = "SET " + (i + 1);
+
+                const wrapper = document.createElement("div");
+                wrapper.className = "numbers";
+
+                numbers.forEach((number) => {
+                    wrapper.appendChild(createBall(number));
+                });
+
+                set.appendChild(label);
+                set.appendChild(wrapper);
+                resultDiv.appendChild(set);
             }
         }
 
-        numbers.sort((a, b) => a - b);
+        themeButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                setTheme(button.dataset.themeOption);
+            });
+        });
 
-        const div = document.createElement("div");
-        div.className = "set";
-        div.innerText = numbers.join(" - ");
+        generateButton.addEventListener("click", generateLotto);
 
-        resultDiv.appendChild(div);
-    }
-}
-</script>
-
+        loadTheme();
+        generateLotto();
+    </script>
 </body>
 </html>
